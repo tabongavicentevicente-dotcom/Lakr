@@ -1,0 +1,6 @@
+{
+  "name": "LaKr",
+  "description": "Aplicativo exclusivo para casais recheado de amor: chat em tempo real, álbum de fotos compartilhado, contador de dias juntos, datas especiais, mapa e baú de cartas secretas nas cores rosa suave, branco e dourado.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
