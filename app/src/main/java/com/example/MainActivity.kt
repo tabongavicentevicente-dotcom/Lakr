@@ -21,10 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ui.screens.*
-import com.example.ui.theme.LaKrTheme
-import com.example.ui.theme.RoseBackground
-import com.example.ui.theme.RoseWhite
-import com.example.ui.theme.GoldSoft
+import com.example.ui.theme.*
 import com.example.ui.viewmodel.CoupleViewModel
 
 class MainActivity : ComponentActivity() {
@@ -106,7 +103,7 @@ fun LaKrAppContainer(viewModel: CoupleViewModel) {
                             )
                         },
                         colors = NavigationBarItemDefaults.colors(
-                            indicatorColor = com.example.ui.screens.SoftButtonBorderPink()
+                            indicatorColor = SoftButtonBorderPink
                         ),
                         modifier = Modifier.testTag("nav_item_${item.id}")
                     )

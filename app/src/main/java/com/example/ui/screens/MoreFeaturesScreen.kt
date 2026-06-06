@@ -313,7 +313,7 @@ fun GoalItemCard(
                                 color = when (goal.status) {
                                     0 -> RoseTertiary.copy(alpha = 0.4f)
                                     1 -> GoldSoft
-                                    else -> SoftButtonBorderPink()
+                                    else -> SoftButtonBorderPink
                                 },
                                 shape = RoundedCornerShape(8.dp)
                             )

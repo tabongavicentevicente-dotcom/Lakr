@@ -16,6 +16,8 @@ import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.ClearAll
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -29,6 +31,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.layout.ContentScale
+import com.example.R
 import com.example.data.model.LaKrAiMessage
 import com.example.ui.theme.*
 import com.example.ui.viewmodel.CoupleViewModel
@@ -92,7 +98,7 @@ fun LaKrAiScreen(viewModel: CoupleViewModel) {
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier
-                            .size(42.dp)
+                            .size(44.dp)
                             .clip(CircleShape)
                             .background(
                                 brush = Brush.linearGradient(
@@ -100,11 +106,13 @@ fun LaKrAiScreen(viewModel: CoupleViewModel) {
                                 )
                             )
                     ) {
-                        Icon(
-                            imageVector = Icons.Filled.AutoAwesome,
+                        Image(
+                            painter = painterResource(id = R.drawable.img_lakr_logo),
                             contentDescription = "LaKr IA",
-                            tint = Color.White,
-                            modifier = Modifier.size(22.dp)
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop
                         )
                     }
                     Spacer(modifier = Modifier.width(12.dp))
@@ -329,11 +337,13 @@ fun AiChatBubble(message: LaKrAiMessage) {
                         )
                     )
             ) {
-                Icon(
-                    imageVector = Icons.Filled.AutoAwesome,
+                Image(
+                    painter = painterResource(id = R.drawable.img_lakr_logo),
                     contentDescription = "",
-                    tint = Color.White,
-                    modifier = Modifier.size(14.dp)
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop
                 )
             }
         }

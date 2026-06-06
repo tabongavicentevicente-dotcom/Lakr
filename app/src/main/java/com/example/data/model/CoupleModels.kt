@@ -9,13 +9,19 @@ data class CoupleConfig(
     @PrimaryKey val id: Int = 1,
     val partner1Name: String = "Kresley",
     val partner2Name: String = "Larissa",
-    val anniversaryDate: Long = 1702512000000L, // Default: December 14, 2023
+    val anniversaryDate: Long = 1748044800000L, // Default: May 24, 2025
     val vaultPin: String = "1214",
     val currentActiveUser: String = "Kresley",
     val partner1Phone: String = "+55 (11) 99999-1214",
     val partner2Phone: String = "+55 (11) 98888-1214",
     val partner1Email: String = "kresley@lakr.love",
-    val partner2Email: String = "larissa@lakr.love"
+    val partner2Email: String = "larissa@lakr.love",
+    val partner1Hobbies: String = "",
+    val partner2Hobbies: String = "",
+    val howTheyMet: String = "",
+    val relationshipDreams: String = "",
+    val aiPersonality: String = "Super Fofa e Romântica",
+    val customApiKey: String = ""
 ) : Serializable
 
 @Entity(tableName = "chat_messages")

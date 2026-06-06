@@ -17,4 +17,5 @@ val GoldChampagne = Color(0xFFC084FC)    // Soft technologic purple glow
 val GoldSoft = Color(0xFF1E112F)         // Dark glowing violet container hue
 val GoldDark = Color(0xFFC084FC)         // Vibrant violet-dark highlight
 val White = Color(0xFFFFFFFF)
+val SoftButtonBorderPink = Color(0xFF3B0764) // Rich dark violet/pink accent
 

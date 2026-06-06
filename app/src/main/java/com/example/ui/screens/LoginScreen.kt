@@ -28,6 +28,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.painterResource
+import com.example.R
 import com.example.ui.theme.*
 import com.example.ui.viewmodel.CoupleViewModel
 
@@ -42,6 +44,7 @@ fun LoginScreen(
     var otpInput by remember { mutableStateOf("") }
     var isPhoneFlowSelected by remember { mutableStateOf(false) }
     var showErrorMessage by remember { mutableStateOf<String?>(null) }
+    var customGoogleNameInput by remember { mutableStateOf("") }
     
     val isOtpSent by viewModel.isOtpSent.collectAsState()
     val showOauthGuidance by viewModel.currentOauthGuidanceVisible.collectAsState()
@@ -74,27 +77,29 @@ fun LoginScreen(
             ) {
                 Box(
                     modifier = Modifier
-                        .size(80.dp)
-                        .clip(RoundedCornerShape(20.dp))
+                        .size(130.dp)
+                        .clip(RoundedCornerShape(32.dp))
                         .background(
                             brush = Brush.linearGradient(
                                 colors = listOf(Color(0xFF1E1A2B), Color(0xFF0C0C0E))
                             )
                         )
                         .border(
-                            width = 1.5.dp,
+                            width = 2.dp,
                             brush = Brush.linearGradient(
                                 colors = listOf(RosePrimary, Color.Transparent, RoseTertiary)
                             ),
-                            shape = RoundedCornerShape(20.dp)
+                            shape = RoundedCornerShape(32.dp)
                         ),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = Icons.Filled.AutoAwesome,
-                        contentDescription = "LaKr Logo Heart",
-                        tint = RoseSecondary,
-                        modifier = Modifier.size(46.dp)
+                    Image(
+                        painter = painterResource(id = R.drawable.img_lakr_logo),
+                        contentDescription = "LaKr Logo",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(RoundedCornerShape(32.dp)),
+                        contentScale = ContentScale.Crop
                     )
                 }
 
@@ -115,9 +120,7 @@ fun LoginScreen(
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.5.sp
                 )
-            }
-
-            // Entry Form Card
+            }            // Entry Form Card
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -140,232 +143,64 @@ fun LoginScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Conecte-se com sua metade",
+                        text = "Nosso Espaço de Amor",
                         style = MaterialTheme.typography.titleMedium,
                         color = CocoaDark,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center
                     )
 
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = "Um cantinho especial e exclusivo para nós dois. Clique abaixo para entrar e celebrar cada marco de nossa linda história juntos! ✨💖",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = RoseGray,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(horizontal = 8.dp)
+                    )
+
+                    Spacer(modifier = Modifier.height(24.dp))
 
                     if (loading) {
                         CircularProgressIndicator(color = RosePrimary)
-                    } else if (!isPhoneFlowSelected) {
-                        // Choice Menu
+                    } else {
                         Button(
-                            onClick = { viewModel.loginWithGoogle() },
+                            onClick = { 
+                                // Direct login: uses partner2Name (Larissa) as default initializer
+                                viewModel.completeGoogleSimulation(config.partner2Name)
+                            },
                             colors = ButtonDefaults.buttonColors(containerColor = RosePrimary),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(52.dp)
-                                .testTag("google_login_btn"),
-                            shape = RoundedCornerShape(12.dp)
+                                .height(56.dp)
+                                .testTag("entrar_nosso_espaco_btn"),
+                            shape = RoundedCornerShape(16.dp),
+                            elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
                         ) {
-                            Icon(Icons.Filled.LockOpen, contentDescription = "Google Icon", modifier = Modifier.size(20.dp))
+                            Icon(Icons.Filled.Favorite, contentDescription = "Heart Icon", modifier = Modifier.size(22.dp), tint = Color.White)
                             Spacer(modifier = Modifier.width(10.dp))
-                            Text("Entrar com Google", style = MaterialTheme.typography.labelLarge)
-                        }
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        OutlinedButton(
-                            onClick = { isPhoneFlowSelected = true },
-                            colors = ButtonDefaults.outlinedButtonColors(contentColor = CocoaDark),
-                            border = BorderStroke(1.dp, GoldMetallic),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(52.dp)
-                                .testTag("phone_login_btn"),
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
-                            Icon(Icons.Filled.Phone, contentDescription = "Phone Icon", modifier = Modifier.size(20.dp), tint = GoldMetallic)
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Text("Entrar com Telefone", style = MaterialTheme.typography.labelLarge, color = CocoaDark)
-                        }
-                    } else {
-                        // Phone Auth Screen
-                        if (!isOtpSent) {
                             Text(
-                                text = "Insira o seu telefone de amor",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = RoseGray,
-                                modifier = Modifier.padding(bottom = 8.dp)
-                            )
-
-                            OutlinedTextField(
-                                value = phoneInput,
-                                onValueChange = { phoneInput = it },
-                                label = { Text("Número de celular") },
-                                leadingIcon = { Icon(Icons.Filled.Phone, contentDescription = null, tint = RosePrimary) },
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                                singleLine = true,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .testTag("phone_input"),
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = RosePrimary,
-                                    unfocusedBorderColor = GoldChampagne
-                                )
-                            )
-
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                            Button(
-                                onClick = {
-                                    if (phoneInput.length >= 8) {
-                                        viewModel.triggerPhoneVerification(phoneInput)
-                                    } else {
-                                        showErrorMessage = "Por favor, insira um número válido!"
-                                    }
-                                },
-                                colors = ButtonDefaults.buttonColors(containerColor = RosePrimary),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(48.dp)
-                                    .testTag("send_otp_btn")
-                            ) {
-                                Text("Enviar Código do Amor")
-                            }
-
-                            TextButton(onClick = { isPhoneFlowSelected = false }) {
-                                Text("Voltar", color = GoldDark)
-                            }
-                        } else {
-                            // OTP verification Screen
-                            Text(
-                                text = "Digitando o Cupom de Acesso",
+                                text = "Entrar no Nosso Espaço", 
                                 style = MaterialTheme.typography.titleMedium,
-                                color = RosePrimary,
-                                modifier = Modifier.padding(bottom = 4.dp),
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.ExtraBold,
+                                color = Color.White
                             )
-
-                            Text(
-                                text = "Para simular, use o dia do seu amor: 1214",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = GoldDark,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.padding(bottom = 12.dp)
-                            )
-
-                            OutlinedTextField(
-                                value = otpInput,
-                                onValueChange = { otpInput = it },
-                                label = { Text("Código de 4 dígitos") },
-                                leadingIcon = { Icon(Icons.Filled.Key, contentDescription = null, tint = GoldMetallic) },
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                                singleLine = true,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .testTag("otp_input"),
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = GoldChampagne,
-                                    unfocusedBorderColor = RoseTertiary
-                                )
-                            )
-
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                            Button(
-                                onClick = {
-                                    val success = viewModel.verifyPhoneOtp(otpInput)
-                                    if (!success) {
-                                        showErrorMessage = "Código inválido. Use '1214'!"
-                                    }
-                                },
-                                colors = ButtonDefaults.buttonColors(containerColor = GoldMetallic),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(48.dp)
-                                    .testTag("confirm_otp_btn")
-                            ) {
-                                Text("Confirmar Cupido")
-                            }
-
-                            TextButton(onClick = { viewModel.isOtpSent.value = false }) {
-                                Text("Reenviar código", color = RosePrimary)
-                            }
                         }
                     }
 
-                    showErrorMessage?.let {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
-                    }
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    // Footer info
+                    Text(
+                        text = "LaKr — Larissa & Kresley Forever 🔒❤️",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = RoseGray,
+                        letterSpacing = 1.sp,
+                        modifier = Modifier.padding(bottom = 12.dp)
+                    )
                 }
             }
-
-            // Footer info
-            Text(
-                text = "LaKr — Larissa & Kresley Forever 🔒❤️",
-                style = MaterialTheme.typography.labelSmall,
-                color = RoseGray,
-                letterSpacing = 1.sp,
-                modifier = Modifier.padding(bottom = 20.dp)
-            )
-        }
-
-        // Google / OAuth Configuration Guidance Dialog / Sheet
-        if (showOauthGuidance) {
-            AlertDialog(
-                onDismissRequest = { viewModel.currentOauthGuidanceVisible.value = false },
-                title = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Filled.Info, contentDescription = null, tint = GoldMetallic, modifier = Modifier.size(28.dp))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Configuração do Google", style = MaterialTheme.typography.titleLarge)
-                    }
-                },
-                text = {
-                    Column {
-                        Text(
-                            text = "Para habilitar o login real do Google com segurança, você precisa registrar as chaves SHA-1 no Firebase Console e arrumar o Google Identity.",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = CocoaDark
-                        )
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Text(
-                            text = "Deseja testar o aplicativo entrando como um dos amantes agora mesmo?",
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = RosePrimary
-                        )
-                    }
-                },
-                confirmButton = {
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        Button(
-                            onClick = { viewModel.completeGoogleSimulation(config.partner1Name) },
-                            colors = ButtonDefaults.buttonColors(containerColor = SoftButtonBorderPink()),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 4.dp),
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
-                            Text("Entrar como ${config.partner1Name}", color = CocoaDark)
-                        }
-                        
-                        Button(
-                            onClick = { viewModel.completeGoogleSimulation(config.partner2Name) },
-                            colors = ButtonDefaults.buttonColors(containerColor = GoldSoft),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 4.dp),
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
-                            Text("Entrar como ${config.partner2Name}", color = CocoaDark)
-                        }
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { viewModel.currentOauthGuidanceVisible.value = false }) {
-                        Text("Cancelar", color = RoseGray)
-                    }
-                },
-                shape = RoundedCornerShape(16.dp),
-                containerColor = RoseWhite
-            )
         }
     }
 }
@@ -375,6 +210,4 @@ fun listWithGradient() = listOf(
     RoseBackground,
     RoseWhite
 )
-
-fun SoftButtonBorderPink() = Color(0xFF3B0764)
 

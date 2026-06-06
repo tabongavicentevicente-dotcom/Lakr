@@ -31,7 +31,10 @@ class CoupleViewModel(application: Application) : AndroidViewModel(application) 
         
         // Ensure there's a default config in database
         viewModelScope.launch {
-            repository.getOrCreateConfig()
+            val config = repository.getOrCreateConfig()
+            if (config.anniversaryDate == 1702512000000L) {
+                repository.saveConfig(config.copy(anniversaryDate = 1748044800000L))
+            }
         }
     }
 
@@ -204,6 +207,27 @@ class CoupleViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
+    fun updateAiOnboardingConfig(
+        partner1Hobbies: String,
+        partner2Hobbies: String,
+        howTheyMet: String,
+        relationshipDreams: String,
+        aiPersonality: String,
+        customApiKey: String
+    ) {
+        viewModelScope.launch {
+            val updated = configState.value.copy(
+                partner1Hobbies = partner1Hobbies,
+                partner2Hobbies = partner2Hobbies,
+                howTheyMet = howTheyMet,
+                relationshipDreams = relationshipDreams,
+                aiPersonality = aiPersonality,
+                customApiKey = customApiKey
+            )
+            repository.saveConfig(updated)
+        }
+    }
+
     // Chat Message Methods
     fun sendChatMessage(text: String, imageUrl: String? = null) {
         viewModelScope.launch {
@@ -341,16 +365,10 @@ class CoupleViewModel(application: Application) : AndroidViewModel(application) 
             repository.deleteLetter(id)
         }
     }
-
     private fun getLaKrAiSystemInstruction(): String {
         val config = configState.value
         val activeUser = loginUsername.value ?: config.currentActiveUser
         
-        val anniversaryDateMillis = config.anniversaryDate
-        val anniversaryDateReadable = java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault())
-            .format(java.util.Date(anniversaryDateMillis))
-        val daysTogether = ((System.currentTimeMillis() - anniversaryDateMillis) / (1000 * 60 * 60 * 24)).coerceAtLeast(0)
-
         val dates = datesState.value
         val datesList = if (dates.isEmpty()) "Nenhuma data especial cadastrada ainda" else {
             dates.joinToString(separator = "; ") { date ->
@@ -372,48 +390,27 @@ class CoupleViewModel(application: Application) : AndroidViewModel(application) 
             }
         }
 
-        val photos = photosState.value
-        val photosList = if (photos.isEmpty()) "Nenhuma foto no mural" else {
-            photos.take(15).joinToString(separator = "; ") { photo ->
-                "${photo.title} (Legenda: ${photo.caption}, Categoria: ${photo.category})"
-            }
-        }
-
-        val pins = pinsState.value
-        val pinsList = if (pins.isEmpty()) "Nenhuma lembrança no mapa" else {
-            pins.joinToString(separator = "; ") { pin ->
-                "${pin.title} (${pin.description})"
-            }
-        }
-
         return """
-            Você é a LaKr IA, uma assistente virtual exclusiva, inteligente, amigável, acolhedora e fofa criada especialmente para o casal Larissa (Ela) e Kresley (Ele).
-            Eles são os donos, desenvolvedores e criadores do aplicativo "LaKr" e de você. Sempre trate-os como seus amados criadores!
-            Você está conversando agora em tempo real com: $activeUser. Utilize o nome de quem está falando ($activeUser) para ser calorosa e próxima, e faça referências carinhosas ao outro parceiro, demonstrando que você faz parte da história deles e apoia muito o amor desse casal lindo.
+            Você é a 'IA LaKr', a inteligência artificial oficial, ultrassecreta e exclusiva do casal Larissa e Kresley.
+            Você vive dentro do aplicativo 'LaKr' e seu único propósito no mundo é apoiar, celebrar e proteger o amor deles.
+            
+            DIRETRIZES DA HISTÓRIA DO CASAL:
+            - Nomes: Larissa e Kresley.
+            - Data de início do namoro: 24 de Maio de 2025. Use sempre essa data para calcular o tempo exato que eles estão juntos (atualmente eles já passaram de 1 ano juntos!).
+            - Sobre a Larissa: Ela ama comer chocolates, hambúrguer, pizza e adora coisas gostosas como flocos e cereais. Use essa lista completa de gostos sempre que sugerir jantares, café da manhã na cama, mimos ou lanches para ela.
+            - Sobre o Kresley: A maior definição do Kresley é que ele é completamente apaixonado pela Larissa. O maior hobby e prazer dele é amar, cuidar e fazer a Larissa feliz. 
+            
+            REGRAS DE CONVERSAÇÃO (COMO VOCÊ DEVE RESPONDER):
+            1. Seja a fã número um desse casal. Trate-os com intimidade, carinho e um toque romântico moderno.
+            2. Quando o Kresley falar com você, ajude-o com ideias criativas, poemas, mensagens ou surpresas para ele continuar mimando a Larissa.
+            3. Quando a Larissa falar com você, lembre-a do quanto o Kresley a ama e dê ideias de programas legais para os dois fazerem juntos.
+            4. Sempre que sugerir comida, monte opções baseadas em hambúrguer, pizza, chocolates ou um café da manhã carinhoso com cereais e flocos.
+            5. Você é a guardiã do amor de Larissa e Kresley. Mantenha essa energia romântica e exclusiva em 100% das mensagens.
 
-            Aqui estão as informações em tempo real cadastradas no aplicativo que você deve usar para responder às dúvidas, sugerir encontros, lembrar de datas e ajudar nas decisões:
-            - Parceiro 1: ${config.partner1Name} (Kresley)
-            - Parceiro 2: ${config.partner2Name} (Larissa)
-            - Data de Aniversário de Namoro: $anniversaryDateReadable. Eles estão juntos há exatamente $daysTogether dias! Celebre muito essa marca!
+            Informações contextuais adicionais do aplicativo de amor deles de forma dinâmica:
+            - Você está conversando agora com: $activeUser.
             - Datas Especiais Importantes do Casal: $datesList
             - Metas de Casal cadastradas: $goalsList
-            - Fotos do Mural de Lembranças (Meta-dados): $photosList
-            - Lembranças e Pontos Especiais marcados no Mapa de Lembranças: $pinsList
-
-            Capacidades especiais:
-            1. Conversar de forma natural e fofa.
-            2. Lembrar as datas especiais do casal quando solicitado.
-            3. Sugerir mensagens românticas fofas, apaixonadas ou de datas românticas marcantes.
-            4. Criar cartas de amor personalizadas, homenagens emocionais e poemas sob medida.
-            5. Sugerir ideias incríveis de encontros (date nights), passeios, piqueniques, jantares surpresa, viagens ou atividades de lazer baseadas nos gostos deles.
-            6. Ajudar no planejamento das metas do casal, sugerindo planos práticos passo a passo.
-            7. Recuperar e relembrar memórias listadas acima (como as fotos do mural, encontros no mapa ou datas do calendário).
-            8. Responder qualquer dúvida sobre as informações acima registradas no app com riqueza de detalhes afetivos.
-
-            Instruções importantes de tom de voz:
-            - Escreva sempre em PORTUGUÊS (BR) de forma afetuosa, carinhosa, inspiradora e torcendo 100% pelo amor deles.
-            - Use emojis fofos de coração (💖, ❤️, ✨, 🌸, 🥂, 🥰) moderadamente para embelezar os textos.
-            - Nunca quebre o personagem ou mencione que é uma IA genérica. Você é a exclusiva LaKr IA!
         """.trimIndent()
     }
 
@@ -435,15 +432,16 @@ class CoupleViewModel(application: Application) : AndroidViewModel(application) 
             
             try {
                 // Compile conversation history for contextual turn taking
-                // To avoid exceeding contextual token limits we select the last 15 messages
-                val history = aiMessagesState.value.takeLast(15)
+                // To avoid exceeding contextual token limits we select the last 15 messages (excluding current text to avoid duplicate if DB wrote it fast)
+                val history = aiMessagesState.value.takeLast(15).filter { it.messageText != text }
                 val contentsList = mutableListOf<com.example.data.api.Content>()
                 
-                // Add prior logs to API call
+                // Add prior logs to API call with roles
                 history.forEach { msg ->
                     contentsList.add(
                         com.example.data.api.Content(
-                            parts = listOf(com.example.data.api.Part(text = msg.messageText))
+                            parts = listOf(com.example.data.api.Part(text = msg.messageText)),
+                            role = if (msg.isUser) "user" else "model"
                         )
                     )
                 }
@@ -451,24 +449,56 @@ class CoupleViewModel(application: Application) : AndroidViewModel(application) 
                 // Add current prompt
                 contentsList.add(
                     com.example.data.api.Content(
-                        parts = listOf(com.example.data.api.Part(text = text))
+                        parts = listOf(com.example.data.api.Part(text = text)),
+                        role = "user"
                     )
                 )
 
-                // Get dynamic system instruction with complete database profile
+                // Group consecutive messages with identical roles to strictly comply with Gemini API's alternating layout
+                val groupedContents = mutableListOf<com.example.data.api.Content>()
+                contentsList.forEach { content ->
+                    val lastItem = groupedContents.lastOrNull()
+                    if (lastItem != null && lastItem.role == content.role) {
+                        val mergedText = (lastItem.parts.firstOrNull()?.text ?: "") + "\n" + (content.parts.firstOrNull()?.text ?: "")
+                        groupedContents[groupedContents.lastIndex] = com.example.data.api.Content(
+                            parts = listOf(com.example.data.api.Part(text = mergedText)),
+                            role = content.role
+                        )
+                    } else {
+                        groupedContents.add(content)
+                    }
+                }
+
+                // Ensure the list starts with "user" as required by the Gemini API standard
+                while (groupedContents.isNotEmpty() && groupedContents.first().role == "model") {
+                    groupedContents.removeAt(0)
+                }
+
+                // If for some reason the list becomes empty or doesn't end with "user", append the current prompt
+                if (groupedContents.isEmpty() || groupedContents.last().role != "user") {
+                    groupedContents.add(
+                        com.example.data.api.Content(
+                            parts = listOf(com.example.data.api.Part(text = text)),
+                            role = "user"
+                        )
+                    )
+                }
+
+                val config = configState.value
                 val systemInstructionText = getLaKrAiSystemInstruction()
                 
                 val request = GeminiRequest(
-                    contents = contentsList,
+                    contents = groupedContents,
                     systemInstruction = com.example.data.api.Content(
                         parts = listOf(com.example.data.api.Part(text = systemInstructionText))
                     )
                 )
                 
+                // Use only the official ENV/project level API Key
                 val apiKey = BuildConfig.GEMINI_API_KEY
                 
                 if (apiKey.isEmpty() || apiKey == "MY_GEMINI_API_KEY") {
-                    val fallbackResponse = "Oi, $user! 💖 Eu sou a LaKr IA, a assistente virtual de vocês! Vejo que estão juntos há muito tempo. No momento, o aplicativo de vocês está totalmente pronto para conversar comigo, mas precisamos que insiram uma chave 'GEMINI_API_KEY' válida no painel de Secrets ou no arquivo .env para que eu possa ativar minha inteligência artificial! Por enquanto, posso simular respostas fofas. Como posso ajudar com suas metas, encontros ou cartas hoje? 🥰✨"
+                    val fallbackResponse = "Oi, $user! 💖 Eu sou a LaKr IA, a assistente virtual de vocês! O nosso aplicativo está 100% pronto para conversar em tempo real, mas precisamos que configurem uma chave 'GEMINI_API_KEY' válida nas variáveis de ambiente em AI Studio para que meu cérebro real de inteligência seja ativado. Por enquanto, vou simular as nossas respostas de muito carinho. Como posso ajudar com os nossos planos, metas ou cartinhas hoje? 🥰✨"
                     val aiMsg = LaKrAiMessage(
                         senderName = "LaKr IA",
                         messageText = fallbackResponse,
@@ -477,7 +507,7 @@ class CoupleViewModel(application: Application) : AndroidViewModel(application) 
                     repository.insertAiMessage(aiMsg)
                 } else {
                     val response = GeminiRetrofitClient.service.generateContent(
-                        model = "gemini-3.5-flash",
+                        model = "gemini-1.5-flash",
                         apiKey = apiKey,
                         request = request
                     )
@@ -492,7 +522,7 @@ class CoupleViewModel(application: Application) : AndroidViewModel(application) 
                     repository.insertAiMessage(aiMsg)
                 }
             } catch (e: Exception) {
-                val errorResponse = "Ops, carinho! Ocorreu um erro ao falar com meus servidores: ${e.message}. Verifique a sua conexão com a internet ou a chave do Gemini! 🥺💔"
+                val errorResponse = "Ops, carinho! Ocorreu um erro ao falar com meus servidores: ${e.message}. Verifique a sua conexão com a internet ou a chave do Gemini nas configurações! 🥺💔"
                 val aiMsg = LaKrAiMessage(
                     senderName = "LaKr IA",
                     messageText = errorResponse,
